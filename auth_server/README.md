@@ -18,7 +18,7 @@ kk.sample.auth_server.preference パッケージ下のクラスにより情報�
 OAuth2AuthenticationSuccessHandlerExt により情報登録状態を判定  
 
 ### oidc レスポンスにリソースサーバの権限を追加
-OAuth2TokenContextService の内部処理により OidcUserInfo に "authorities" を設定　　　
+OAuth2TokenContextService の内部処理により OidcUserInfo に "authorities" を設定  
 SecurityConfigExt#jwtAuthenticationConverter により上記で設定された "authorities" を参照する様に設定　　　
 
 ### バリデーション  
