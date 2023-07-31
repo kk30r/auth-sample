@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!--  ファイル内で使えるプロパティ設定 -->
+    <property name="logFileName" value="app"/>
+
+    <!--  springのプロパティ設定（application.yml等）の呼び出し（springPropetyタグ） -->
+    <springProperty name="logRef" source="logging.ref"/>
+    <springProperty name="logFilePath" source="logging.file.path"/>
+
+    <!--  コンソールへのログ出力  -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy/MM/dd HH:mm:ss} %-5level [%thread] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- アプリケーションログのファイル書き出し -->
+    <appender name="APPLICATION_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logFilePath}/${logFileName}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- ！重要！：fileNamePatternに指定した%dパターン文字列により、logbackはローリングスケジュールを決定する。 -->
+            <fileNamePattern>${logFilePath}/${logFileName}-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--  APIリクエストロガーの設定  -->
+    <!--  loggerタグにname属性を付与することにより指定したパッケージやクラスで発生したログを指定したappenderで出力できる -->
+    <logger name="org.springframework" level="WARN">
+        <appender-ref ref="${logRef}"/>
+    </logger>
+
+    <!--  ルートロガーの設定  -->
+    <root level="INFO">
+        <appender-ref ref="${logRef}"/>
+    </root>
+</configuration>

@@ -1,0 +1,17 @@
+## YAML Template.
+---
+logging:
+  config: classpath:config/logback-spring.xml
+
+spring.banner.location: classpath:banner/banner.txt
+
+server.servlet.session:
+  timeout: 30m
+  cookie:
+    name: sid
+    domain: localhost
+    path: /
+    max-age: 30m
+    http-only: true
+    secure: true
+

@@ -1,0 +1,40 @@
+## YAML Template.
+---
+logging:
+  ref: STDOUT
+
+server:
+  port : 8080
+
+spring.datasource:
+  platform: h2
+  driver-class-name: org.h2.Driver
+  url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MYSQL
+#  url: jdbc:h2:file:./hogefiledb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MYSQL
+  username: sa
+  password: password
+  initialize: true
+
+spring.sql.init:
+  encoding: UTF-8
+  mode: always
+  schema-locations: classpath:config-local/schema.sql
+  data-locations: classpath:config-local/data.sql
+
+spring.jpa:
+  show-sql: false
+  properties:
+    hibernate:
+      format_sql: true
+  hibernate.ddl-auto: none
+
+# コンソールを有効化
+# http://localhost:8080/h2-console へアクセス
+spring.h2:
+  console:
+    enabled: true
+    path: /h2-console
+    settings:
+      web-allow-others: true
+
+client_preference.setting_path: classpath:config-local/client_pref.yml

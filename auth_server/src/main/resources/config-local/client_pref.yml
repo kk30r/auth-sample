@@ -1,0 +1,7 @@
+---
+- clientId: "messaging-client"
+  requiredFields:
+  - field: "address"
+    required: true
+  - field: "address2"
+    required: false
