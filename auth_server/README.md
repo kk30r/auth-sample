@@ -1,4 +1,4 @@
-#auth_server  
+# auth_server  
 spring-security-oauth2-authorization-server をベースにした IdP のサンプルです。  
 
 ## ローカル起動  
