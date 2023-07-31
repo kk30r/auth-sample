@@ -2,7 +2,8 @@
 spring-security-oauth2-authorization-server をベースにした IdP のサンプルです。  
 
 ## ローカル起動  
-mvn から　SpringBoot を起動するコマンドにて起動可能です。 起動ポートは設定ファイルに記載していますが、８０９０となっています。  
+mvn から　SpringBoot を起動するコマンドにて起動可能です。  
+起動ポートは設定ファイルに記載していますが、８０９０となっています。  
 
 ### 設定ファイル  
 src/main/resources 配下にある　config ディレクトリ、config-local ディレクトリに格納しています。  
