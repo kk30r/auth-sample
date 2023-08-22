@@ -89,7 +89,8 @@ public class UserAccountLockService {
             userAccountLock = new UserAccountLock();
             userAccountLock.setUsername(username);
             userAccountLock.setFailureCount(0L);
-        } else if (userAccountLock.getFailureCount() <= accountLockThreshold) {
+        }
+        if (userAccountLock.getFailureCount() <= accountLockThreshold) {
             // アタックがあった場合オーバーフローが発生する可能性がある為
             // 閾値を越えてなければカウントアップ
             userAccountLock.setFailureCount(userAccountLock.getFailureCount() + 1);

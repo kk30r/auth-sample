@@ -35,6 +35,9 @@
     <logger name="org.springframework" level="WARN">
         <appender-ref ref="${logRef}"/>
     </logger>
+    <logger name="ch.qos.logback" level="ERROR">
+        <appender-ref ref="${logRef}"/>
+    </logger>
 
     <!--  ルートロガーの設定  -->
     <root level="INFO">

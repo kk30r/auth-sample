@@ -14,6 +14,8 @@ spring.datasource:
   username: sa
   password: password
   initialize: true
+  hikari:
+      maximum-pool-size: 20
 
 spring.sql.init:
   encoding: UTF-8
