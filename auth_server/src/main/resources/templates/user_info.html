@@ -16,19 +16,23 @@
                 <div th:if="${#fields.hasErrors('firstName')}" class="alert alert-danger" role="alert" th:errors="*{firstName}">First Name Error</div>
                 <p>
                     <label for="firstName" class="sr-only">firstName</label>
-                    <input type="text" id="firstName" th:field="*{firstName}" class="form-control" placeholder="First Name" required autofocus>
+                    <input type="text" id="firstName" th:field="*{firstName}" class="form-control" placeholder="First Name" required="required" autofocus/>
                 </p>
                 <div th:if="${#fields.hasErrors('lastName')}" class="alert alert-danger" role="alert" th:errors="*{lastName}">Last Name Error</div>
                 <p>
                     <label for="lastName" class="sr-only">lastName</label>
-                    <input type="text" id="lastName" th:field="*{lastName}" class="form-control" placeholder="Last Name" required autofocus>
+                    <input type="text" id="lastName" th:field="*{lastName}" class="form-control" placeholder="Last Name" required="required" autofocus/>
                 </p>
                 <div th:if="${#fields.hasErrors('address')}" class="alert alert-danger" role="alert" th:errors="*{address}">Address Error</div>
                 <p>
                     <label for="address" class="sr-only">address</label>
-                    <input type="text" id="address" th:field="*{address}" class="form-control" placeholder="address" autofocus>
+                    <input type="text" id="address" th:field="*{address}" class="form-control" placeholder="address" autofocus/>
                 </p>
-                <!--<input name="_csrf" type="hidden" value="X67x04GuJomlg3G86yGjqWn2s3HxOGzZDPLWm3rcUTHmFJn7a8yV4bmWQLiIukOO2QyXkFjOnhPFCAn0OJbj-UK9ZFfed_rM" />-->
+                <div th:if="${#fields.hasErrors('address2')}" class="alert alert-danger" role="alert" th:errors="*{address2}">Address2 Error</div>
+                <p>
+                    <label for="address2" class="sr-only">address2</label>
+                    <input type="text" id="address2" th:field="*{address2}" class="form-control" placeholder="address2" autofocus/>
+                </p>
                 <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
             </form>
         </div>

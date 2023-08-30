@@ -108,6 +108,7 @@ public class SecurityConfig {
             throws Exception {
         http
                 .authorizeHttpRequests((authorize) -> {
+                    authorize.requestMatchers("/unauth/**").anonymous();
                     authorize
                             .anyRequest().authenticated();
                 })
@@ -117,7 +118,7 @@ public class SecurityConfig {
                 .formLogin(Customizer.withDefaults());
         http.logout(configurer -> {
             configurer.clearAuthentication(true)
-                    .deleteCookies("JSESSIONID");
+                    .deleteCookies(sessionCookieName);
         });
 
         return http.build();

@@ -2,11 +2,10 @@ package kk.sample.auth_server;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpSession;
-import java.util.Collections;
 import java.util.List;
 import kk.sample.auth_server.preference.resource.ClientPreferenceResource;
 import kk.sample.auth_server.user_info.form.UserInfoFormGroups;
+import static kk.sample.auth_server.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -185,8 +184,11 @@ public class ApplicationTest {
                     = (List<String>) mvcResult.getModelAndView().getModel().get("validationError");
             assertEquals(1, errors.size());
             assertEquals("must not be blank", errors.get(0));
+            assertEquals("/user_info",
+                         mvcResult.getModelAndView().getViewName());
         }
 
+        // 入力
         {
             newSession = copySession(mvcResult);
             mvcResult = mockMvc.perform(post("/user_info")
@@ -199,6 +201,21 @@ public class ApplicationTest {
                     .andReturn();
             assertEquals("http://localhost/oauth2/authorize?continue",
                          mvcResult.getResponse().getRedirectedUrl());
+        }
+        {
+            newSession = copySession(mvcResult);
+            mvcResult = mockMvc.perform(get("/oauth2/authorize")
+                    .session(newSession)
+                    .param("response_type", "code")
+                    .param("scope", "openid")
+                    .param("client_id", "messaging-client")
+                    .param("redirect_uri",
+                           "http://127.0.0.1:8090/login/oauth2/code/messaging-client-oidc"))
+                    .andExpect(status().isFound())
+                    .andReturn();
+
+            String redirectedUrl = mvcResult.getResponse().getRedirectedUrl();
+            assertTrue(redirectedUrl.startsWith("http://127.0.0.1:8090/login/oauth2/code/messaging-client-oidc?code="));
         }
     }
 
@@ -483,21 +500,6 @@ public class ApplicationTest {
         }
 
         return new AuthDto(mvcResult, newSession, idToken, accessToken, refreshToken);
-    }
-
-    /**
-     *
-     * @param mvcResult
-     * @return
-     */
-    protected MockHttpSession copySession(MvcResult mvcResult) {
-        HttpSession sessionOrg = mvcResult.getRequest().getSession();
-        final MockHttpSession newSession = new MockHttpSession();
-        Collections.list(sessionOrg.getAttributeNames()).stream()
-                .forEach(name -> {
-                    newSession.setAttribute(name, sessionOrg.getAttribute(name));
-                });
-        return newSession;
     }
 
     @Disabled

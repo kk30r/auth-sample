@@ -71,6 +71,7 @@ public class SecurityConfigExt extends SecurityConfig {
         http
                 .securityMatcher(endpointsMatcher)
                 .authorizeHttpRequests(authorize -> {
+                    authorize.requestMatchers("/unauth/**").anonymous();
                     authorize
                             .anyRequest().authenticated();
                 })
