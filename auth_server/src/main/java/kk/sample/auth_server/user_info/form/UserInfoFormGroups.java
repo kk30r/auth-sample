@@ -8,4 +8,7 @@ public interface UserInfoFormGroups {
 
     public static interface Address extends UserInfoFormGroups {
     }
+
+    public static interface Address2 extends UserInfoFormGroups {
+    }
 }

@@ -85,6 +85,8 @@ public class OAuth2TokenContextService {
             oidcUserInfoBuilder.familyName(userDetailsExt.getLastName())
                     .givenName(userDetailsExt.getFirstName())
                     .address(userDetailsExt.getAddress());
+            oidcUserInfoBuilder.claim("address2",
+                                      userDetailsExt.getAddress2());
 
             oidcUserInfoBuilder.claim("authorities",
                                       userDetails.getAuthorities().stream()

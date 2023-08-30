@@ -21,4 +21,7 @@ public class UserInfoForm implements Serializable {
 
     @NotBlank(groups = UserInfoFormGroups.Address.class)
     protected String address;
+
+    @NotBlank(groups = UserInfoFormGroups.Address2.class)
+    protected String address2;
 }

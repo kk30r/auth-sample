@@ -30,4 +30,7 @@ public class UserInfo {
     @Column(name = "address")
     protected String address;
 
+    @Column(name = "address2")
+    protected String address2;
+
 }

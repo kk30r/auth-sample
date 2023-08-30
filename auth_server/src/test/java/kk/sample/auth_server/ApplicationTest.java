@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import java.util.Collections;
 import java.util.List;
+import kk.sample.auth_server.preference.resource.ClientPreferenceResource;
+import kk.sample.auth_server.user_info.form.UserInfoFormGroups;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -17,7 +19,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
@@ -43,9 +44,6 @@ public class ApplicationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private JwtDecoder jwtDecoder;
-
     /**
      *
      * @return @throws Exception
@@ -53,11 +51,10 @@ public class ApplicationTest {
     public MvcResult init() throws Exception {
         MvcResult mvcResult = mockMvc.perform(get("/oauth2/authorize")
                 .param("response_type", "code")
-                //                .param("scope", "openid")
-                .param("scope", "openid+profile")
+                .param("scope", "openid")
                 .param("client_id", "messaging-client")
                 .param("redirect_uri",
-                       "http://127.0.0.1:8090/login/oauth2/code/messaging-client-oidc"))
+                       "http://127.0.0.1:8090/login/oauth2/code/auth-server-sample"))
                 .andExpect(status().isFound())
                 .andReturn();
 
@@ -83,7 +80,7 @@ public class ApplicationTest {
      */
     @Test
     public void testLogin() throws Exception {
-        AuthDto mvcDto = authorize();
+        authorize();
     }
 
     /**
@@ -202,6 +199,87 @@ public class ApplicationTest {
                     .andReturn();
             assertEquals("http://localhost/oauth2/authorize?continue",
                          mvcResult.getResponse().getRedirectedUrl());
+        }
+    }
+
+    @Autowired
+    protected ClientPreferenceResource clientPreferenceResource;
+
+    /**
+     * USER2
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testLogin_unsatisfiedField_onSSO() throws Exception {
+
+        AuthDto authDto = authorize();
+        MvcResult mvcResult;
+
+        MockHttpSession newSession = authDto.session;
+
+        // SSO
+        {
+            mvcResult = mockMvc.perform(get("/oauth2/authorize")
+                    .session(newSession)
+                    .param("response_type", "code")
+                    .param("scope", "openid")
+                    .param("client_id", "messaging-client")
+                    .param("redirect_uri",
+                           "http://127.0.0.1:8090/login/oauth2/code/auth-server-sample")
+                    .param("state", "VxUuVQDfNkJAY-VkwRUv5L_SHV33jkNoAq7jRY9eCng%3D")
+                    .param("nonce", "NTOT5oHJ40qaWHq-NfrQQyEH1FWCs9hdXG0rjqs5mpM"))
+                    .andExpect(status().isFound())
+                    .andReturn();
+
+            String redirectedUrl = mvcResult.getResponse().getRedirectedUrl();
+            assertTrue(redirectedUrl.startsWith("http://127.0.0.1:8090/login/oauth2/code/auth-server-sample?code="));
+        }
+
+        newSession = copySession(mvcResult);
+
+        // SSO
+        {
+            mvcResult = mockMvc.perform(get("/oauth2/authorize")
+                    .session(newSession)
+                    .param("response_type", "code")
+                    .param("scope", "openid")
+                    .param("client_id", "messaging-client")
+                    .param("redirect_uri",
+                           "http://127.0.0.1:8090/login/oauth2/code/auth-server-sample")
+                    .param("state", "VxUuVQDfNkJAY-VkwRUv5L_SHV33jkNoAq7jRY9eCng%3D")
+                    .param("nonce", "NTOT5oHJ40qaWHq-NfrQQyEH1FWCs9hdXG0rjqs5mpM"))
+                    .andExpect(status().isFound())
+                    .andReturn();
+
+            String redirectedUrl = mvcResult.getResponse().getRedirectedUrl();
+            assertTrue(redirectedUrl.startsWith("http://127.0.0.1:8090/login/oauth2/code/auth-server-sample?code="));
+        }
+
+        try {
+            clientPreferenceResource.getPreference("messaging-client")
+                    .put("address2", UserInfoFormGroups.Address2.class);
+
+            // SSO with unsatisfiedField
+            {
+                mvcResult = mockMvc.perform(get("/oauth2/authorize")
+                        .session(newSession)
+                        .param("response_type", "code")
+                        .param("scope", "openid")
+                        .param("client_id", "messaging-client")
+                        .param("redirect_uri",
+                               "http://127.0.0.1:8090/login/oauth2/code/auth-server-sample")
+                        .param("state", "VxUuVQDfNkJAY-VkwRUv5L_SHV33jkNoAq7jRY9eCng%3D")
+                        .param("nonce", "NTOT5oHJ40qaWHq-NfrQQyEH1FWCs9hdXG0rjqs5mpM"))
+                        .andExpect(status().isFound())
+                        .andReturn();
+
+                String redirectedUrl = mvcResult.getResponse().getRedirectedUrl();
+                assertEquals("/user_info", redirectedUrl);
+            }
+        } finally {
+            clientPreferenceResource.getPreference("messaging-client")
+                    .remove("address2");
         }
     }
 
