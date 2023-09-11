@@ -13,7 +13,12 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "AUTHORITIES")
 @lombok.Data
+@lombok.NoArgsConstructor
 public class Authorities {
+
+    public Authorities(Long usersId, String authority) {
+        this.pk = new PK(usersId, authority);
+    }
 
     @EmbeddedId
     private PK pk;
@@ -24,6 +29,8 @@ public class Authorities {
 
     @Embeddable
     @lombok.Data
+    @lombok.NoArgsConstructor
+    @lombok.AllArgsConstructor
     public static class PK {
 
         @Column(name = "users_id", insertable = false, updatable = false)

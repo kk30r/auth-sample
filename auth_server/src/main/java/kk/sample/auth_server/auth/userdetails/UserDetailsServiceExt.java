@@ -18,6 +18,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsPasswordService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 /**
  *
@@ -81,9 +84,34 @@ public class UserDetailsServiceExt implements UserDetailsManager,
         return userDetails;
     }
 
+    /**
+     * {@inheritDoc }
+     */
+    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Exception.class)
     @Override
     public void createUser(UserDetails user) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Assert.isAssignable(UserDetails.class, user.getClass());
+
+        final Users users = new Users();
+        {
+            BeanUtils.copyProperties(user,
+                                     users);
+            // because of insertion
+            users.setId(null);
+            usersRepository.save(users);
+        }
+        {
+            final UserInfo userInfo = new UserInfo();
+            BeanUtils.copyProperties(user,
+                                     userInfo);
+            userInfo.setUsersId(users.getId());
+            userInfoRepository.save(userInfo);
+        }
+        {
+            final Authorities authorities = new Authorities(users.getId(),
+                                                            "ROLE_USER");
+            authoritiesRepository.save(authorities);
+        }
     }
 
     @Override

@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
+ * ユーザ情報<br>
+ * TODO : 入力チェック
  *
  * @author Kensuke.Ito
  */

@@ -1,3 +1,4 @@
+DROP ALL OBJECTS;
 
 CREATE TABLE IF NOT EXISTS oauth2_registered_client (
         id varchar(100) NOT NULL,

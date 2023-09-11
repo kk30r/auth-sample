@@ -11,4 +11,7 @@ public interface UserInfoFormGroups {
 
     public static interface Address2 extends UserInfoFormGroups {
     }
+
+    public static interface EMAIL extends UserInfoFormGroups {
+    }
 }

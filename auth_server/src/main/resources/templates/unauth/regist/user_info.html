@@ -11,8 +11,27 @@
     </head>
     <body>
         <div class="container">
-            <form class="form-signin" th:action="@{/user_info}" method="post">
+            <form class="form-signin" th:action="@{/unauth/regist/user_info}" method="post">
                 <h2 class="form-signin-heading">User information</h2>
+
+                <p>
+                    <label for="phoneNumber" class="sr-only">phoneNumber</label>
+                    <input type="text" id="phoneNumber" disabled="true" th:value="${phoneNumber}" class="form-control" />
+                </p>
+
+                <th:block th:object="${passwordForm}">
+                    <div th:if="${#fields.hasErrors('password')}" class="alert alert-danger" role="alert" th:errors="*{password}">Password Error</div>
+                    <p>
+                        <label for="password" class="sr-only">password</label>
+                        <input type="text" id="firstName" th:field="*{password}" class="form-control" placeholder="Password" required="required" autofocus/>
+                    </p>
+
+                    <div th:if="${#fields.hasErrors('confirmPassword')}" class="alert alert-danger" role="alert" th:errors="*{confirmPassword}">Confirm Password Error</div>
+                    <p>
+                        <label for="confirmPassword" class="sr-only">confirmPassword</label>
+                        <input type="text" id="confirmPassword" th:field="*{confirmPassword}" class="form-control" placeholder="Confirm Password" required="required" autofocus/>
+                    </p>
+                </th:block>
 
                 <th:block th:object="${userInfoForm}">
                     <div th:if="${#fields.hasErrors('firstName')}" class="alert alert-danger" role="alert" th:errors="*{firstName}">First Name Error</div>
@@ -47,6 +66,7 @@
                         <input type="text" id="email" th:field="*{email}" class="form-control" placeholder="email" autofocus/>
                     </p>
                 </th:block>
+
 
                 <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
             </form>

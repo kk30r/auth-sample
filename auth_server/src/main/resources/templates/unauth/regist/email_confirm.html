@@ -5,17 +5,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
         <meta name="description" content=""/>
         <meta name="author" content=""/>
-        <title>Phone number confirmation</title>
+        <title>Email confirmation</title>
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous"/>
         <link href="https://getbootstrap.com/docs/4.0/examples/signin/signin.css" rel="stylesheet" crossorigin="anonymous"/>
     </head>
     <body>
         <div class="container">
-            <form class="form-signin" th:action="@{/unauth/regist/phone_number/confirm}" method="post">
+            <form class="form-signin" th:action="@{/unauth/regist/user_info/confirm}" method="post">
                 <h2 class="form-signin-heading">Code confirmation</h2>
 
-                <th:block th:object="${phoneNumberForm}">
-                    <input type="hidden" id="phoneNumber" th:field="*{phoneNumber}" class="form-control" required="required"d/>
+                <th:block th:object="${emailForm}">
+                    <input type="hidden" id="email" th:field="*{email}" class="form-control" required="required"/>
                 </th:block>
 
                 <th:block th:object="${confirmCodeForm}">

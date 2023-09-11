@@ -16,7 +16,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
@@ -36,12 +35,25 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
  */
 @EnableWebSecurity
 @Configuration(proxyBeanMethods = false)
-@lombok.RequiredArgsConstructor
 public class SecurityConfigExt extends SecurityConfig {
 
     protected final OAuth2TokenContextService oauth2TokenContextService;
 
     protected final ClientPreferenceService clientPreferenceService;
+
+    /**
+     *
+     * @param securityConfigProperties
+     * @param oauth2TokenContextService
+     * @param clientPreferenceService
+     */
+    public SecurityConfigExt(SecurityConfigProperties securityConfigProperties,
+                             OAuth2TokenContextService oauth2TokenContextService,
+                             ClientPreferenceService clientPreferenceService) {
+        super(securityConfigProperties);
+        this.oauth2TokenContextService = oauth2TokenContextService;
+        this.clientPreferenceService = clientPreferenceService;
+    }
 
     /**
      * authorizationResponseHandler を拡張する<br>
@@ -71,7 +83,7 @@ public class SecurityConfigExt extends SecurityConfig {
         http
                 .securityMatcher(endpointsMatcher)
                 .authorizeHttpRequests(authorize -> {
-                    authorize.requestMatchers("/unauth/**").anonymous();
+                    authorize.requestMatchers("/unauth/**").permitAll();
                     authorize
                             .anyRequest().authenticated();
                 })
@@ -158,11 +170,11 @@ public class SecurityConfigExt extends SecurityConfig {
      * @return
      */
     @Bean
-    public UserDetailsService userDetailsService(final JpaService jpaService,
-                                                 final UsersRepository usersRepository,
-                                                 final UserInfoRepository userInfoRepository,
-                                                 final AuthoritiesRepository authoritiesRepository,
-                                                 final UserAccountLockService userAccountLockService) {
+    public UserDetailsServiceExt userDetailsService(final JpaService jpaService,
+                                                    final UsersRepository usersRepository,
+                                                    final UserInfoRepository userInfoRepository,
+                                                    final AuthoritiesRepository authoritiesRepository,
+                                                    final UserAccountLockService userAccountLockService) {
         return new UserDetailsServiceExt(jpaService,
                                          usersRepository,
                                          userInfoRepository,

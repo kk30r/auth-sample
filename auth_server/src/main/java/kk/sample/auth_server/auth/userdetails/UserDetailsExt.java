@@ -27,6 +27,8 @@ public class UserDetailsExt extends Users implements UserDetails {
 
     protected String address2;
 
+    protected String email;
+
     @lombok.Setter
     protected Collection<? extends GrantedAuthority> authorities;
 }

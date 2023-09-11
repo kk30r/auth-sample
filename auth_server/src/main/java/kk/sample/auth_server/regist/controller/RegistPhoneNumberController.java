@@ -3,11 +3,12 @@ package kk.sample.auth_server.regist.controller;
 import com.google.common.collect.Lists;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import kk.sample.auth_server.controller.ControllerIF;
 import kk.sample.auth_server.regist.form.RegistConfirmCodeForm;
 import kk.sample.auth_server.regist.form.RegistPhoneNumberForm;
 import kk.sample.auth_server.regist.service.RegistPhoneNumberService;
+import kk.sample.auth_server.regist.service.RegistPhoneNumberService.ConfirmContext;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,15 +26,15 @@ import org.springframework.web.server.ResponseStatusException;
  * @author Kensuke.Ito
  */
 @Controller
-@RequestMapping("/unauth/regist")
+@RequestMapping(RegistPhoneNumberController.BASE_PATH)
 @lombok.RequiredArgsConstructor
-public class RegistPhoneNumberController {
+public class RegistPhoneNumberController implements ControllerIF {
 
-    public static final String BASE_PATH = "unauth/regist/phone_number";
+    public static final String BASE_PATH = "/unauth/regist/phone_number";
 
-    public static final String KEY_CONFIRM_CODE = RegistPhoneNumberController.class.getSimpleName() + ".confirm_code";
+    public static final String KEY_CONFIRM_CODE = "RegistPhoneNumberController.confirm_code";
 
-    public static final String KEY_CONFIRMED_PHONENUM = RegistPhoneNumberController.class.getSimpleName() + ".confirmed_phone_number";
+    public static final String KEY_CONFIRMED_PHONENUM = "RegistPhoneNumberController.confirmed_phone_number";
 
     protected final RegistPhoneNumberService registPhoneNumberService;
 
@@ -43,8 +44,8 @@ public class RegistPhoneNumberController {
      * @param model
      * @return
      */
-    @GetMapping("/phone_number")
-    public String phoneNumber(Model model) {
+    @GetMapping("")
+    public String index(Model model) {
         model.addAttribute("phoneNumberForm", new RegistPhoneNumberForm());
         return BASE_PATH;
     }
@@ -58,19 +59,14 @@ public class RegistPhoneNumberController {
      * @param request
      * @return
      */
-    @PostMapping("/phone_number")
-    public String phoneNumberSent(@Validated @ModelAttribute RegistPhoneNumberForm phoneNumberForm,
-                                  BindingResult result,
-                                  Model model,
-                                  HttpServletRequest request) {
+    @PostMapping("")
+    public String post(@Validated @ModelAttribute RegistPhoneNumberForm phoneNumberForm,
+                       BindingResult result,
+                       Model model,
+                       HttpServletRequest request) {
         model.addAttribute("phoneNumberForm", phoneNumberForm);
 
-        if (result.hasErrors()) {
-            final List<String> errorList = Lists.newArrayList();
-            for (ObjectError error : result.getAllErrors()) {
-                errorList.add(error.getDefaultMessage());
-            }
-            model.addAttribute("validationError", errorList);
+        if (hasValidationError(model, result) == true) {
             return BASE_PATH;
         }
 
@@ -78,10 +74,9 @@ public class RegistPhoneNumberController {
         // session に保存すると別ブラウザで処理された場合に参照できなくなるので
         // そこを対応したい場合は送信キックした画面に認証コードを表示し、入力させると better かも
         registPhoneNumberService.send(phoneNumberForm.getPhoneNumber(),
-                                      confirmCode -> {
+                                      confirmContext -> {
                                           request.getSession().setAttribute(KEY_CONFIRM_CODE,
-                                                                            Pair.of(phoneNumberForm.getPhoneNumber(),
-                                                                                    confirmCode));
+                                                                            confirmContext);
                                       });
 
         model.addAttribute("confirmCodeForm", new RegistConfirmCodeForm());
@@ -92,40 +87,38 @@ public class RegistPhoneNumberController {
      * 電話番号疎通確認 送信
      *
      * @param confirmCodeForm
-     * @param result
+     * @param confirmCodeResult
+     * @param phoneNumberForm
+     * @param phoneNumberResult
      * @param model
      * @param request
      * @return
      */
-    @GetMapping("/phone_number/confirm")
+    @PostMapping("/confirm")
     public String phoneNumberConfirm(@Validated @ModelAttribute RegistConfirmCodeForm confirmCodeForm,
-                                     BindingResult result,
+                                     BindingResult confirmCodeResult,
+                                     @Validated @ModelAttribute RegistPhoneNumberForm phoneNumberForm,
+                                     BindingResult phoneNumberResult,
                                      Model model,
                                      HttpServletRequest request) {
         model.addAttribute("confirmCodeForm", confirmCodeForm);
+        model.addAttribute("phoneNumberForm", phoneNumberForm);
 
-        if (result.hasErrors()) {
-            final List<String> errorList = Lists.newArrayList();
-            for (ObjectError error : result.getAllErrors()) {
-                errorList.add(error.getDefaultMessage());
-            }
-            model.addAttribute("validationError", errorList);
+        if (hasValidationError(model, confirmCodeResult, phoneNumberResult) == true) {
             return BASE_PATH + "_confirm";
         }
 
-        final Pair<String, String> confirmPair
-                = (Pair<String, String>) request.getSession().getAttribute(KEY_CONFIRM_CODE);
-        if (confirmPair == null
-                || StringUtils.isNoneEmpty(confirmPair.getKey(), confirmPair.getValue()) == false) {
+        final ConfirmContext confirmContext
+                = (ConfirmContext) request.getSession().getAttribute(KEY_CONFIRM_CODE);
+        if (confirmContext == null
+                || StringUtils.isNoneEmpty(confirmContext.getPhoneNumber(), confirmContext.getConfirmCode()) == false) {
             throw new ResponseStatusException(HttpStatusCode.valueOf(503),
                                               "failed status for confirm phone number");
         }
 
-        final String phoneNumber = confirmPair.getKey();
-
-        final boolean confirmResult = registPhoneNumberService.confirm(phoneNumber,
+        final boolean confirmResult = registPhoneNumberService.confirm(phoneNumberForm.getPhoneNumber(),
                                                                        confirmCodeForm.getConfirmCode(),
-                                                                       phoneNum -> confirmPair.getValue());
+                                                                       phoneNum -> confirmContext);
         if (confirmResult == false) {
             final List<String> errorList = Lists.newArrayList(new ObjectError("confirmCode",
                                                                               "confirmCode.invalid").getDefaultMessage());
@@ -135,7 +128,8 @@ public class RegistPhoneNumberController {
 
         request.getSession().removeAttribute(KEY_CONFIRM_CODE);
         request.getSession().setAttribute(KEY_CONFIRMED_PHONENUM,
-                                          phoneNumber);
-        return "redirect:/unauth/regist/profile";
+                                          confirmContext.getPhoneNumber());
+
+        return "redirect:" + RegistUserInfoController.BASE_PATH;
     }
 }

@@ -28,9 +28,12 @@ import org.springframework.security.web.authentication.SavedRequestAwareAuthenti
  *
  * @author Kensuke.Ito
  */
+@lombok.RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Value("${server.servlet.session.timeout.cookie.name:JSESSIONID}")
+    protected final SecurityConfigProperties securityConfigProperties;
+
+    @Value("${server.servlet.session.cookie.name:JSESSIONID}")
     protected String sessionCookieName;
 
     /**
@@ -58,7 +61,7 @@ public class SecurityConfig {
         // authorization endpoint
         http.exceptionHandling((exceptions) -> {
             exceptions.authenticationEntryPoint(
-                    new LoginUrlAuthenticationEntryPoint("/login"));
+                    new LoginUrlAuthenticationEntryPoint(securityConfigProperties.getLoginUrl()));
         });
         http.logout(configurer -> {
             configurer.clearAuthentication(true)
@@ -108,7 +111,7 @@ public class SecurityConfig {
             throws Exception {
         http
                 .authorizeHttpRequests((authorize) -> {
-                    authorize.requestMatchers("/unauth/**").anonymous();
+                    authorize.requestMatchers("/unauth/**").permitAll();
                     authorize
                             .anyRequest().authenticated();
                 })

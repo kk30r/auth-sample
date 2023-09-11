@@ -57,6 +57,9 @@ public class ApplicationTest {
                 .andExpect(status().isFound())
                 .andReturn();
 
+        assertEquals("http://localhost/login",
+                     mvcResult.getResponse().getRedirectedUrl());
+
         RequestCache requestCache = new HttpSessionRequestCache();
         requestCache.saveRequest(mvcResult.getRequest(),
                                  mvcResult.getResponse());
@@ -177,6 +180,7 @@ public class ApplicationTest {
                     .session(newSession)
                     .param("firstName", "USER2_F")
                     .param("lastName", "USER2_L")
+                    //                    .param("email", "")
                     .with(SecurityMockMvcRequestPostProcessors.csrf()))
                     .andExpect(status().isOk())
                     .andReturn();
@@ -437,7 +441,7 @@ public class ApplicationTest {
 
         mvcResult = mockMvc.perform(post("/login")
                 .session(newSession)
-                .param("username", "USER1")
+                .param("username", "user1")
                 .param("password", "password")
                 .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isFound())
